@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    //Background
+    <style name="Style_20" >
+        <item name="android:background">@drawable/bgtest</item>
+        //name="android:alpha">0.8
+    </style>
+
+
+
+
+</resources>
