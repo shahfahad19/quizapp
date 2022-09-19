@@ -24,7 +24,7 @@ public class Questions_Activity extends AppCompatActivity {
     TextView questionIndex, questionText, totalText, correctText, wrongText;
     Button optA, optB, optC, optD;
 
-    int questionId = 0;
+    int questionId = 1;
     int questionsLength = 0;
     int correct = 0;
     int wrong = 0;
@@ -93,7 +93,6 @@ public class Questions_Activity extends AppCompatActivity {
 
     }
     public void getQuestion() {
-        questionId++;
         questionIndex.setText("Question. "+ questionId);
         Cursor questionData = databaseHelper.getQuestion(subCategory, questionId);
         while (questionData.moveToNext()) {
@@ -108,6 +107,7 @@ public class Questions_Activity extends AppCompatActivity {
 
     public void checkAnswer(String selectedOption) {
         if (questionId <= questionsLength) {
+            questionId++;
             if (selectedOption.equals(correctOption)) {
                 Toast.makeText(this, "Correct", Toast.LENGTH_SHORT).show();
                 correct++;
@@ -133,12 +133,12 @@ public class Questions_Activity extends AppCompatActivity {
                 }
             }
 
-
             editor.commit();
+            if (questionId<=questionsLength) {
+                getQuestion();
+            }
 
         }
-
-        if (questionId < questionsLength) getQuestion();
         else {
             Toast.makeText(this, "Questions Finished", Toast.LENGTH_SHORT).show();
         }
