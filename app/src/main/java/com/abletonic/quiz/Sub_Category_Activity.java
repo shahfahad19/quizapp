@@ -15,7 +15,7 @@ public class Sub_Category_Activity extends AppCompatActivity {
 
     RecyclerView rv_sub_category;
     String category;
-    DatabaseHelper categoryDBHelper;
+    DatabaseHelper databaseHelper;
     List<String> subCategories = new ArrayList<>();
 
     @Override
@@ -32,8 +32,8 @@ public class Sub_Category_Activity extends AppCompatActivity {
             setTitle(category + " Categories");
         }
 
-        categoryDBHelper = new DatabaseHelper(this, "Quiz.db", 1);
-        Cursor subCatsCursor = categoryDBHelper.getSubCategories(category);
+        databaseHelper = new DatabaseHelper(this, 1);
+        Cursor subCatsCursor = databaseHelper.getSubCategories(category);
         while (subCatsCursor.moveToNext()) {
             subCategories.add(subCatsCursor.getString(1));
         }
@@ -43,7 +43,7 @@ public class Sub_Category_Activity extends AppCompatActivity {
 
 
         String[] subCategoriesArray = subCategories.toArray(new String[0]);
-        rv.setAdapter(new CategoryAdapter(subCategoriesArray));
+        rv.setAdapter(new SubCategoryAdapter(subCategoriesArray));
 
 
 
@@ -51,7 +51,20 @@ public class Sub_Category_Activity extends AppCompatActivity {
 
 
 
-    
+    public void onClickCalled(String subCategory) {
+        Intent i = new Intent(getApplicationContext(), Questions_Activity.class);
+        i.putExtra("category", category);
+        i.putExtra("subCategory", subCategory);
+        startActivity(i);
+
+    }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        finish();
+        startActivity(getIntent());
+    }
 
 
 }

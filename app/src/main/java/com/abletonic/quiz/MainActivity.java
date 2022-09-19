@@ -14,7 +14,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
 
-    DatabaseHelper categoryDBHelper;
+    DatabaseHelper databaseHelper;
     RecyclerView rv_category;
     List<String> categories = new ArrayList<String>();
     @Override
@@ -25,21 +25,21 @@ public class MainActivity extends AppCompatActivity {
         rv_category = findViewById(R.id.rv_category);
 
 
-        categoryDBHelper = new DatabaseHelper(this, "Quiz.db", 1);
+        databaseHelper = new DatabaseHelper(this, 1);
 
         try {
-            categoryDBHelper.CheckDb();
+            databaseHelper.CheckDb();
         }
         catch (Exception e) {e.printStackTrace();}
         try {
-            categoryDBHelper.OpenDatabase();
+            databaseHelper.OpenDatabase();
         }
         catch (Exception e) {e.printStackTrace();}
 
 
-        Cursor myClasses = categoryDBHelper.getMainCategories();
-        while (myClasses.moveToNext()) {
-            categories.add(myClasses.getString(1));
+        Cursor allCategories = databaseHelper.getMainCategories();
+        while (allCategories.moveToNext()) {
+            categories.add(allCategories.getString(1));
         }
 
         RecyclerView rv = findViewById(R.id.rv_category);
@@ -58,8 +58,15 @@ public class MainActivity extends AppCompatActivity {
         Intent i = new Intent(getApplicationContext(), Sub_Category_Activity.class);
         i.putExtra("category", category);
         startActivity(i);
-
     }
+
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+        finish();
+        startActivity(getIntent());
+    }
+
 
 
 }
