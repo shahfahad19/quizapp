@@ -15,11 +15,13 @@ import androidx.recyclerview.widget.RecyclerView;
 public class SubCategoryAdapter extends RecyclerView.Adapter<SubCategoryAdapter.viewHolder> {
 
     private String[] subCategories;
+    private String[] subCat_IDs;
     SharedPreferences sharedPreferences;
     Context context;
 
 
-    public SubCategoryAdapter(String subCategories[]) {
+    public SubCategoryAdapter(String subCat_IDs[], String subCategories[]) {
+        this.subCat_IDs = subCat_IDs;
         this.subCategories = subCategories;
     }
 
@@ -35,12 +37,14 @@ public class SubCategoryAdapter extends RecyclerView.Adapter<SubCategoryAdapter.
     @Override
     public void onBindViewHolder(@NonNull viewHolder holder, int position) {
         String subCategoryStr = subCategories[position];
+        String subCategoryID = subCat_IDs[position];
+        int subCat_ID = parseInt(subCategoryID);
 
         sharedPreferences = context.getSharedPreferences("Prefs", Context.MODE_PRIVATE);
         String completedQuestions = sharedPreferences.getString(subCategoryStr, "0");
 
         DatabaseHelper databaseHelper = new DatabaseHelper(context, 1);
-        int totalQuestions = databaseHelper.getQuestionsLength(subCategoryStr);
+        int totalQuestions = databaseHelper.getSubCatQuestionsCount(subCat_ID);
 
         int progress = 0;
         try {
@@ -56,7 +60,7 @@ public class SubCategoryAdapter extends RecyclerView.Adapter<SubCategoryAdapter.
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((Sub_Category_Activity) v.getContext()).onClickCalled(subCategoryStr);
+                ((Sub_Category_Activity) v.getContext()).onClickCalled(subCat_ID, subCategoryStr);
 
             }
         });

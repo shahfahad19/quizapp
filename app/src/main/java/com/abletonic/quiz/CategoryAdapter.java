@@ -16,11 +16,13 @@ import androidx.recyclerview.widget.RecyclerView;
 public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.viewHolder> {
 
     private String[] categories;
+    private String[] cat_IDs;
     Context context;
     SharedPreferences sharedPreferences;
 
-    public CategoryAdapter(String categories[]) {
+    public CategoryAdapter(String cat_IDs[], String categories[]) {
         this.categories = categories;
+        this.cat_IDs = cat_IDs;
     }
 
     @NonNull
@@ -34,30 +36,30 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.viewHo
 
     @Override
     public void onBindViewHolder(@NonNull viewHolder holder, int position) {
+        String categoryID = cat_IDs[position];
+        int catID = parseInt(categoryID);
         String categoryStr = categories[position];
         sharedPreferences = context.getSharedPreferences("Prefs", Context.MODE_PRIVATE);
         String completed = sharedPreferences.getString(categoryStr, "0");
 
 
-        String completedCategories = sharedPreferences.getString(categoryStr, "0");
-
         DatabaseHelper databaseHelper = new DatabaseHelper(context, 1);
-        int subCategories = databaseHelper.getSubCategoriesLength(categoryStr);
+        int allQuestions = databaseHelper.getMainCatQuestionsCount(catID);
 
         int progress = 0;
         try {
-            progress = (parseInt(completedCategories) * 100) / subCategories;
+            progress = (parseInt(completed) * 100) / allQuestions;
         }
         catch (Exception e ) {}
 
         holder.categoryText.setText(categoryStr);
-        holder.stats.setText(String.valueOf(completed+"/"+subCategories));
+        holder.stats.setText(String.valueOf(completed+"/"+allQuestions));
         holder.progressBar.setProgress(progress);
 
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ((MainActivity) v.getContext()).onClickCalled(categoryStr);
+                ((MainActivity) v.getContext()).onClickCalled(catID, categoryStr);
 
             }
         });

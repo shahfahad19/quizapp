@@ -28,8 +28,9 @@ public class Questions_Activity extends AppCompatActivity {
     int questionsLength = 0;
     int correct = 0;
     int wrong = 0;
-    String correctOption;
-    String category, subCategory;
+    String correctOption, catName, subCatName;
+    int category, subCategory;
+    Cursor questionData;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,13 +52,15 @@ public class Questions_Activity extends AppCompatActivity {
         Intent intent = getIntent();
         Bundle b = intent.getExtras();
         if (b != null) {
-            category = (String) b.get("category");
-            subCategory = (String) b.get("subCategory");
-            setTitle(subCategory + " Quiz");
+            category = (Integer) b.get("category");
+            subCategory = (Integer) b.get("subCategory");
+            catName = (String) b.get("categoryName");
+            subCatName = (String) b.get("subCategoryName");
         }
 
         databaseHelper = new DatabaseHelper(this, 1);
-        questionsLength = databaseHelper.getQuestionsLength(subCategory);
+        questionData = databaseHelper.getQuestion(subCategory);
+        questionsLength = databaseHelper.getSubCatQuestionsCount(subCategory);
 
         totalText.setText("Total: "+ questionsLength);
         getQuestion();
@@ -67,25 +70,25 @@ public class Questions_Activity extends AppCompatActivity {
         optA.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                checkAnswer(String.valueOf(optA.getText()));
+                checkAnswer("A");
             }
         });
         optB.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                checkAnswer(String.valueOf(optB.getText()));
+                checkAnswer("B");
             }
         });
         optC.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                checkAnswer(String.valueOf(optC.getText()));
+                checkAnswer("C");
             }
         });
         optD.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                checkAnswer(String.valueOf(optD.getText()));
+                checkAnswer("D");
             }
         });
 
@@ -94,21 +97,19 @@ public class Questions_Activity extends AppCompatActivity {
     }
     public void getQuestion() {
         questionIndex.setText("Question. "+ questionId);
-        Cursor questionData = databaseHelper.getQuestion(subCategory, questionId);
-        while (questionData.moveToNext()) {
-            questionText.setText(questionData.getString(1));
-            optA.setText(questionData.getString(3));
-            optB.setText(questionData.getString(4));
-            optC.setText(questionData.getString(5));
-            optD.setText(questionData.getString(6));
-            correctOption = questionData.getString(7);
-        }
+        questionData.moveToNext();
+        questionText.setText(questionData.getString(1));
+        optA.setText(questionData.getString(3));
+        optB.setText(questionData.getString(4));
+        optC.setText(questionData.getString(5));
+        optD.setText(questionData.getString(6));
+        correctOption = questionData.getString(7);
+
     }
 
     public void checkAnswer(String selectedOption) {
         if (questionId <= questionsLength) {
-            questionId++;
-            if (selectedOption.equals(correctOption)) {
+            if (correctOption.contains(selectedOption)) {
                 Toast.makeText(this, "Correct", Toast.LENGTH_SHORT).show();
                 correct++;
                 correctText.setText("Correct: "+ correct);
@@ -121,19 +122,20 @@ public class Questions_Activity extends AppCompatActivity {
 
             SharedPreferences.Editor editor = sharedPreferences.edit();
 
-            //Updating question counter
-            if (questionId > parseInt(sharedPreferences.getString(subCategory, "0"))) {
-                editor.putString(subCategory, String.valueOf(questionId));
+            //Updating question counter only if new questions are answered
+            if (questionId > parseInt(sharedPreferences.getString(subCatName, "0"))) {
 
-                //Checking if category has been completed
-                if ((parseInt(sharedPreferences.getString(subCategory, "0"))+1)==questionsLength) {
-                    int completed = parseInt(sharedPreferences.getString(category, "0"));
-                    completed++;
-                    editor.putString(category, String.valueOf(completed));
-                }
+                //getting main category completed questions count
+                int categoryCompletedQuestionsCount = parseInt(sharedPreferences.getString(catName, "0"));
+                categoryCompletedQuestionsCount+=1;
+                editor.putString(subCatName, String.valueOf(questionId));
+                editor.putString(catName, String.valueOf(categoryCompletedQuestionsCount));
             }
 
             editor.commit();
+            questionId++;
+
+            //Load next question if questionID is in range of questions length
             if (questionId<=questionsLength) {
                 getQuestion();
             }

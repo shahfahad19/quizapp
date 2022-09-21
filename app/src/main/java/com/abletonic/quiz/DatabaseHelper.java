@@ -19,9 +19,10 @@ public class DatabaseHelper extends SQLiteOpenHelper  {
     Context mcontext;
     String dbName, dbPath;
 
+
     public DatabaseHelper(Context context, int version) {
-        super(context, "Quiz.db", null, version);
-        this.dbName = "Quiz.db";
+        super(context, "QuizDB.db", null, version);
+        this.dbName = "QuizDB.db";
         this.mcontext = context;
         this.dbPath = "data/data/"+ "com.abletonic.quiz"+"/databases/";
     }
@@ -82,43 +83,59 @@ public class DatabaseHelper extends SQLiteOpenHelper  {
     public Cursor getMainCategories() {
         String filePath = dbPath + dbName;
         SQLiteDatabase db = SQLiteDatabase.openDatabase(filePath, null, SQLiteDatabase.OPEN_READWRITE);
-        Cursor res = db.rawQuery("select * from Categories", null);
+        Cursor res = db.rawQuery("select * from Category", null);
         return res;
     }
 
-    public Integer getSubCategoriesLength(String category) {
+    public Cursor getSubCategories(int categoryID) {
+        String id = String.valueOf(categoryID);
+        String filePath = dbPath + dbName;
+        SQLiteDatabase db = SQLiteDatabase.openDatabase(filePath, null, SQLiteDatabase.OPEN_READWRITE);
+        Cursor res = db.rawQuery("select * from SubCategory where ID_CAT = ?", new String[]{id});
+        return res;
+    }
+
+    public Integer getSubCategoriesLength(int categoryID) {
+        String id = String.valueOf(categoryID);
         int count = 0;
         try {
             String filePath = dbPath + dbName;
             SQLiteDatabase db = SQLiteDatabase.openDatabase(filePath, null, SQLiteDatabase.OPEN_READWRITE);
-            Cursor res = db.rawQuery("select * from Sub_"+category, null);
+            Cursor res = db.rawQuery("select * from SubCategory where ID_CAT = ?", new String[]{id});
             count = res.getCount();
         }
         catch (Exception e) {}
         return count;
     }
 
-    public Cursor getSubCategories(String category) {
+    public Cursor getQuestion(int subCategory_ID) {
         String filePath = dbPath + dbName;
+        String id = String.valueOf(subCategory_ID);
         SQLiteDatabase db = SQLiteDatabase.openDatabase(filePath, null, SQLiteDatabase.OPEN_READWRITE);
-        Cursor res = db.rawQuery("select * from Sub_"+category, null);
+        Cursor res = db.rawQuery("select * from Question where SubID = ?", new String[]{id});
         return res;
     }
 
-    public Cursor getQuestion(String subCategory, int questionId) {
-        String filePath = dbPath + dbName;
-        String id = String.valueOf(questionId);
-        SQLiteDatabase db = SQLiteDatabase.openDatabase(filePath, null, SQLiteDatabase.OPEN_READWRITE);
-        Cursor res = db.rawQuery("select * from questions"+subCategory+" where ID = ?", new String[]{id});
-        return res;
-    }
-
-    public Integer getQuestionsLength(String subCategory) {
+    public Integer getMainCatQuestionsCount(int category_ID) {
+        String id = String.valueOf(category_ID);
         int count = 0;
         try {
             String filePath = dbPath + dbName;
             SQLiteDatabase db = SQLiteDatabase.openDatabase(filePath, null, SQLiteDatabase.OPEN_READWRITE);
-            Cursor res = db.rawQuery("select * from questions" + subCategory, null);
+            Cursor res = db.rawQuery("select * from Question where CategoryID = ?", new String[]{id});
+            count = res.getCount();
+        }
+        catch (Exception e) {}
+        return count;
+    }
+
+    public Integer getSubCatQuestionsCount(int subCategory_ID) {
+        String id = String.valueOf(subCategory_ID);
+        int count = 0;
+        try {
+            String filePath = dbPath + dbName;
+            SQLiteDatabase db = SQLiteDatabase.openDatabase(filePath, null, SQLiteDatabase.OPEN_READWRITE);
+            Cursor res = db.rawQuery("select * from Question where SubID = ?", new String[]{id});
             count = res.getCount();
         }
         catch (Exception e) {}
